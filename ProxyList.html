@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProxyNet V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0f18;
+            --text-color: #e0e0e0;
+            --primary-color: #00ff9d;
+            --secondary-color: #ff00a0;
+            --accent-color: #0066ff;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 102, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 160, 0.1) 0%, transparent 20%);
+            background-attachment: fixed;
+        }
+        .container {
+            background-color: rgba(20, 20, 20, 0.8);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+            max-width: 800px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+        }
+        input, button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--accent-color);
+            background-color: rgba(0, 102, 255, 0.1);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif;
+        }
+        button {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        .error {
+            color: var(--secondary-color);
+            text-align: center;
+            font-weight: bold;
+        }
+        .game-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .game-item {
+            background-color: rgba(26, 26, 26, 0.8);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .game-item:hover {
+            background-color: rgba(0, 102, 255, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 102, 255, 0.3);
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+        .category-filters {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .category-filters button {
+            padding: 0.5rem 1rem;
+            width: auto;
+            background-color: rgba(0, 102, 255, 0.1);
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+        }
+        .category-filters button:hover {
+            background-color: var(--accent-color);
+        }
+        .favorite-btn {
+            cursor: pointer;
+            user-select: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .favorite-btn:hover {
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .game-controls button {
+            width: auto;
+            margin-bottom: 0;
+        }
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px var(--primary-color);
+            }
+            50% {
+                box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--accent-color);
+            }
+            100% {
+                box-shadow: 0 0 5px var(--primary-color);
+            }
+        }
+        .container {
+            animation: glow 4s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div id="auth-screen">
+            <h1>ProxyNet V2</h1>
+            <input type="password" id="password" placeholder="Enter Access Code" aria-label="Password">
+            <button onclick="authenticate()">Enter</button>
+            <p id="error" class="error" aria-live="polite"></p>
+        </div>
+        <div id="game-screen" style="display: none;">
+            <h1>ProxyNet V2 Preview</h1>
+            <div id="category-filters" class="category-filters" role="group" aria-label="Game categories"></div>
+            <div id="game-list" class="game-list"></div>
+        </div>
+        <div id="game-iframe" style="display: none;">
+            <div class="game-controls">
+                <button onclick="showGameList()">Return to ProxyNet</button>
+                <button onclick="toggleFullscreen()">Fullscreen</button>
+            </div>
+            <h2 id="game-title"></h2>
+            <iframe id="game-frame" allowfullscreen title="Game content"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const games = [
+            { name: "Plexies Arcade L.1", url: "https://academy.saugatnepal.com.np", category: "Arcade" },
+            { name: "Monkey Type", url: "https://monkey-type.org/", category: "Arcade" },
+            { name: "Plexies Arcade L.2", url: "https://edufacts.masplenedigitalworld.com", category: "Arcade" },
+            { name: "Plexies Arcade L.3", url: "https://historylearning.divan-price.ru", category: "Arcade" },
+            { name: "Plexies Arcade L.4", url: "https://mindspaceacademics.nekros.info", category: "Arcade" },
+            { name: "Selenite [PLACEHOLDER]", url: "https://www.deezbananas.cc/", category: "Arcade" },
+            { name: "Faf Games", url: "https://faf-games.gitlab.io/", category: "Arcade" },
+            { name: "Pizza Editition", url: "https://pizzaedition.net/", category: "Arcade" },
+            { name: "Retro Games", url: "https://retro-bowl.gitlab.io/", category: "Arcade" },
+            { name: "Cool Math Games", url: "https://coolmathgames.gitlab.io/", category: "Arcade" },
+            { name: "Basket Bros", url: "https://basketbros.gitlab.io/", category: "Arcade" },
+            { name: "Shady Bears", url: "https://shadybears.gitlab.io/", category: "Arcade" },
+        ];
+
+        let currentCategory = 'all';
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === '9') {
+                window.location.href = 'https://classroom.google.com';
+            }
+        });
+
+        function authenticate() {
+            const password = document.getElementById('password').value;
+            if (password === 'Evan5') {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+                renderCategories();
+                renderGameList();
+            } else {
+                document.getElementById('error').textContent = 'Access Denied. Retry.';
+            }
+        }
+
+        function renderGameList() {
+            const gameList = document.getElementById('game-list');
+            gameList.innerHTML = games
+                .filter(game => currentCategory === 'all' || game.category === currentCategory)
+                .map((game, index) => `
+                    <div class="game-item" onclick="loadGame(${index})" role="button" tabindex="0">
+                        ${game.name}
+                        <span class="favorite-btn" onclick="toggleFavorite(event, ${index})" role="checkbox" aria-checked="${isFavorite(index)}" tabindex="0">
+                            ${isFavorite(index) ? '⭐' : '☆'}
+                        </span>
+                    </div>
+                `).join('');
+        }
+
+        function loadGame(index) {
+            const game = games[index];
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('game-iframe').style.display = 'block';
+            document.getElementById('game-title').textContent = game.name;
+            document.getElementById('game-frame').src = game.url;
+        }
+
+        function showGameList() {
+            document.getElementById('game-iframe').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+        }
+
+        function toggleFavorite(event, index) {
+            event.stopPropagation();
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const gameIndex = favorites.indexOf(index);
+            
+            if (gameIndex === -1) {
+                favorites.push(index);
+            } else {
+                favorites.splice(gameIndex, 1);
+            }
+            
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            renderGameList();
+        }
+
+        function isFavorite(index) {
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            return favorites.includes(index);
+        }
+
+        function renderCategories() {
+            const categories = ['all', ...new Set(games.map(game => game.category))];
+            const categoryContainer = document.getElementById('category-filters');
+            categoryContainer.innerHTML = categories.map(cat => 
+                `<button onclick="filterByCategory('${cat}')">${cat}</button>`
+            ).join('');
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            renderGameList();
+        }
+
+        function toggleFullscreen() {
+            const iframe = document.getElementById('game-frame');
+            
+            if (!document.fullscreenElement) {
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) { // Safari
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) { // IE11
+                    iframe.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { // Safari
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { // IE11
+                    document.msExitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
